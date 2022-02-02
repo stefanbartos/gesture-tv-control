@@ -1,54 +1,55 @@
-import { WebSocket, WebSocketServer, RawData } from 'ws';
+import express from 'express';
 import { v4 as uuidv4 } from 'uuid';
-import { IncomingMessage } from 'http';
+import http from 'http';
+import { Server, Socket } from 'socket.io';
 
-const clientSockets = {};
+const PORT = 2424;
 
-const wss = new WebSocketServer({
-  port: 2424,
-  perMessageDeflate: {
-    zlibDeflateOptions: {
-      chunkSize: 1024,
-      memLevel: 7,
-      level: 3,
-    },
-    zlibInflateOptions: {
-      chunkSize: 10 * 1024,
-    },
-    clientNoContextTakeover: true,
-    serverNoContextTakeover: true,
-    serverMaxWindowBits: 10,
-    concurrencyLimit: 10,
-    threshold: 1024,
+const clientSockets: Socket[] = [];
+
+const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: '*',
+    methods: '*',
   }
 });
 
-const sendMessage = (ws: WebSocket, message: string): void => {
-  ws.send(JSON.stringify(message));
-};
+io.on('connection', (socket: Socket) => {
+  const { headers } = socket.request;
+  const uuid = headers['uuid'].toString() || uuidv4();
+  clientSockets[uuid] = socket;
 
-// CONNECT /?:uuid
-wss.on('connection', (ws: WebSocket, req: IncomingMessage) => {
-  // Client connected
-  const uuidFromUrl = req.url.substring(1);
-  const userID = uuidFromUrl.length > 0 ? uuidFromUrl : uuidv4();
-  // Add new client socket
-  clientSockets[userID] = ws;
+  socket.send(`Welcome UUID: ${uuid}`);
 
-  // Send welcome message
-  sendMessage(ws, `Welcome user ${userID}`);
+  socket.on('message', (data) => {
+    // Decoding the message
+    const message = JSON.parse(data);
 
-  // New message was received from the client
-  ws.on('message', (data: RawData) => {
-    console.log('message from:', userID);
-    const messageArray = JSON.parse(data.toString());
-    const sendToSocket = clientSockets[messageArray[0]];
-    sendMessage(sendToSocket, messageArray[1]);
+    // Get client tvID from message
+    const tvID = message.tvID;
+
+    // Get type from message
+    const messageType = message.type;
+
+    // Get value from message
+    const value = message.value;
+
+    if (messageType && messageType === 'command') {
+      // Find client socket according to tvID
+      const tvSocket = clientSockets[tvID];
+
+      const message = {
+        type: messageType,
+        value,
+      };
+
+      tvSocket.send(JSON.stringify(message));
+    }
   });
+});
 
-  // User connection closed
-  ws.on('close', () => {
-    console.log(`User with ID ${userID} was disconnected`);
-    delete clientSockets[userID];
-  });
+server.listen(PORT, () => {
+  console.log(`listening on *:${PORT}`);
 });
