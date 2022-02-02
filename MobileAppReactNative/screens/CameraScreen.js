@@ -3,7 +3,7 @@ import React, { useEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Camera, useCameraDevices } from 'react-native-vision-camera';
 
-export default function App() {
+const CameraScreen = () => {
   useEffect(async () => {
     const cameraPermission = await Camera.getCameraPermissionStatus();
     console.log(cameraPermission);
@@ -32,3 +32,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
 });
+
+export default CameraScreen;
