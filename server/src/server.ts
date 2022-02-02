@@ -10,6 +10,7 @@ const clientSockets: Socket[] = [];
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
+  transports: ['polling', 'websocket'],
   cors: {
     origin: '*',
     methods: '*',
@@ -18,9 +19,12 @@ const io = new Server(server, {
 
 io.on('connection', (socket: Socket) => {
   const { headers } = socket.request;
-  const uuid = headers['uuid'].toString() || uuidv4();
+  console.log(headers);
+
+  const uuid = headers['uuid'] ? headers['uuid'].toString() : uuidv4();
   clientSockets[uuid] = socket;
 
+  console.log('New client connected', uuid);
   socket.send(`Welcome UUID: ${uuid}`);
 
   socket.on('message', (data) => {
