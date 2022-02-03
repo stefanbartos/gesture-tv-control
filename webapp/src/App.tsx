@@ -11,6 +11,8 @@ const App = (): JSX.Element => (
     <Link to="/video">Start Video</Link>
     <br />
     <Link to="/qr">Check QR</Link>
+    <br />
+    <Link to="/sockets">Run sockets</Link>
   </nav>
 </div>
 )
