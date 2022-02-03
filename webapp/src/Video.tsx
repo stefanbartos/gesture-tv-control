@@ -13,14 +13,14 @@ export default function Video() {
         screenshotFormat="image/jpeg"
         width={1280}
         style={{
-          position: "absolute",
+          position: "fixed",
           marginLeft: "auto",
           marginRight: "auto",
           left: 0,
           right: 0,
-          textAlign: "center",
-          width: 640,
-          height: 480,
+          textAlign: "left",
+          width: "100%",
+          height: "100%",
         }}
       />
     </>
