@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { QrReader } from '@blackbox-vision/react-qr-reader';
 import { useNavigate } from "react-router-dom";
+import { LOCAL_STORAGE_TV_ID } from './constants';
 
 const QRScreen = () => {
   const navigate = useNavigate();
@@ -16,7 +17,7 @@ const QRScreen = () => {
 
       if (type && type === 'TV') {
         if (uuid) {
-          localStorage.setItem('tvID', uuid);
+          localStorage.setItem(LOCAL_STORAGE_TV_ID, uuid);
           alert(`TV ID ${uuid} was loaded`);
         }
       }
