@@ -4,7 +4,7 @@ import Webcam from "react-webcam";
 import "./App.css";
 
 import { throttle } from 'lodash';
-import { useSocketContext } from './SocketContext';
+import { useSocketContext, withSockets } from './SocketContext';
 
 const server_base_url = 'https://172.16.12.251:8080';
 const model_url = `${server_base_url}/model.json`;
@@ -133,4 +133,4 @@ function Video() {
 
 }
 
-export default Video;
+export default withSockets(Video);
