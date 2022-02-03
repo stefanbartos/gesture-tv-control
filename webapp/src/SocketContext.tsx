@@ -1,5 +1,5 @@
 import { Button } from '@mui/material';
-import React, { useEffect, useState } from 'react';
+import React, { Component, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { io, Socket } from 'socket.io-client';
 import { LOCAL_STORAGE_TV_ID } from './constants';
@@ -73,3 +73,14 @@ export const SocketContext = ({ children }) => {
 export const useSocketContext = () => {
     return React.useContext(SocketContextInstance);
 };
+
+export function withSockets(Component: any) {
+    return (props) => {
+        <SocketContextInstance.Consumer>
+            {/*  @ts-ignore */}
+            {context => {
+                <Component {...props} {...context} />
+            }}
+        </SocketContextInstance.Consumer>
+    }
+}
