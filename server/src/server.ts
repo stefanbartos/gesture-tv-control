@@ -3,6 +3,15 @@ import { v4 as uuidv4 } from 'uuid';
 import http from 'http';
 import { Server, Socket } from 'socket.io';
 
+/**
+ * Message format
+ */
+type Message = {
+  type: 'command' | 'info';
+  value: string | number;
+  tvID?: string;
+}
+
 const PORT = 2424;
 
 const clientSockets: Socket[] = [];
@@ -17,6 +26,10 @@ const io = new Server(server, {
   }
 });
 
+const sendMessage = (socket: Socket, message: Message): void => {
+  socket.send(JSON.stringify(message));
+}
+
 io.on('connection', (socket: Socket) => {
   const { headers } = socket.request;
   console.log(headers);
@@ -25,7 +38,10 @@ io.on('connection', (socket: Socket) => {
   clientSockets[uuid] = socket;
 
   console.log('New client connected', uuid);
-  socket.send(`Welcome UUID: ${uuid}`);
+  sendMessage(socket, {
+    type: 'info',
+    value: `Welcome: ${uuid}`,
+  });
 
   socket.on('message', (data) => {
     // Decoding the message
@@ -44,12 +60,12 @@ io.on('connection', (socket: Socket) => {
       // Find client socket according to tvID
       const tvSocket = clientSockets[tvID];
 
-      const message = {
+      const message: Message = {
         type: messageType,
         value,
       };
 
-      tvSocket.send(JSON.stringify(message));
+      sendMessage(tvSocket, message);
     }
   });
 });
